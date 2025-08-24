@@ -24,6 +24,8 @@ export class InputSet<TAction extends string> {
 
 	bindings = $state() as InputBindings<TAction>;
 
+	private cachedDerivedActionStates: DerivedActionStates<TAction> | undefined;
+
 	constructor(defaultBindings: InputBindings<TAction>) {
 		this.availableActions = Object.keys(defaultBindings.actions) as TAction[];
 		this.defaultBindings = defaultBindings;
@@ -37,8 +39,15 @@ export class InputSet<TAction extends string> {
 	}
 
 	use() {
-		const inputManager = useInputManager();
+		if (!this.cachedDerivedActionStates) {
+			const inputManager = useInputManager();
+			this.cachedDerivedActionStates = this.createDerivedActionStates(inputManager);
+		}
 
+		return this.cachedDerivedActionStates;
+	}
+
+	private createDerivedActionStates(inputManager: InputManager) {
 		const result: Record<string, DerivedActionState> = {};
 
 		for (const action of this.availableActions) {
