@@ -1,4 +1,4 @@
-import type { InputTrigger } from './interfaces.js';
+import type { InputTrigger } from '../base/input-trigger.js';
 
 export interface CompositeInputTriggerContext {
 	readonly children: InputTrigger[];

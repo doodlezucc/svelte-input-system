@@ -1,5 +1,5 @@
-import type { InputTrigger } from '$lib/interfaces.js';
 import type { XOR } from 'ts-essentials';
+import type { InputTrigger } from '../base/input-trigger.js';
 import type { KeyboardModifiers } from './keyboard-modifiers.js';
 import { KeyboardState } from './keyboard-state.svelte.js';
 import { normalizeLogicalKey } from './normalize-logical-key.js';

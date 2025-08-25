@@ -1,6 +1,6 @@
+import type { InputTrigger } from '$lib/devices/base/input-trigger.js';
 import { untrack } from 'svelte';
-import type { ActionOf, Inputs } from './inputs-type.js';
-import type { InputTrigger } from './interfaces.js';
+import type { ActionOf, Inputs } from './types.js';
 
 export type InputHandles<T extends Inputs> = {
 	readonly [K in ActionOf<T>]: ActionHandle;

@@ -1,10 +1,8 @@
+import type { TriggerDefinition } from '$lib/devices/union.js';
 import type { Prettify } from 'ts-essentials';
-import type { InputHandles } from './input-handle.svelte.js';
+import type { InputHandles } from './input-handles.svelte.js';
 import { useInputManager } from './input-manager.svelte.js';
-import type { Action, ActionOf, Inputs } from './inputs-type.js';
-import { type KeyboardTriggerDefinition } from './keyboard/keyboard-trigger.svelte.js';
-
-export type TriggerDefinition = KeyboardTriggerDefinition;
+import type { Action, ActionOf, Inputs } from './types.js';
 
 export type InputBindings = {
 	actions: {
@@ -12,21 +10,21 @@ export type InputBindings = {
 	};
 };
 
-type CreateLookupFromBindings<T extends InputBindings> = Prettify<{
+type BindingsFrom<T extends Inputs> = Prettify<{
+	actions: {
+		[K in ActionOf<T>]: TriggerDefinition[];
+	};
+}>;
+
+type CreateInputsTypeFromBindings<T extends InputBindings> = Prettify<{
 	actions: {
 		[K in keyof T['actions']]: Action;
 	};
 }>;
 
-type BindingsFrom<T extends Inputs> = Prettify<{
-	actions: {
-		[K in keyof T['actions']]: TriggerDefinition[];
-	};
-}>;
-
 export function createInputSet<TBindings extends InputBindings>(defaultBindings: TBindings) {
-	return new InputSet<CreateLookupFromBindings<TBindings>>(
-		defaultBindings as unknown as BindingsFrom<CreateLookupFromBindings<TBindings>>
+	return new InputSet<CreateInputsTypeFromBindings<TBindings>>(
+		defaultBindings as unknown as BindingsFrom<CreateInputsTypeFromBindings<TBindings>>
 	);
 }
 

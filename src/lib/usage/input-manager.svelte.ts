@@ -1,11 +1,15 @@
-import { CompositeInputTrigger, type CompositeInputTriggerContext } from './composite.svelte.js';
-import { ActionHandle, type InputHandles } from './input-handle.svelte.js';
-import { type InputSet, type TriggerDefinition } from './input-set.svelte.js';
-import type { ActionOf, Inputs } from './inputs-type.js';
-import type { InputTrigger } from './interfaces.js';
-import { InterruptableKeyboardState } from './keyboard/interruptable-keyboard-state.svelte.js';
-import { registerKeyboardStateDriver } from './keyboard/keyboard-driver.svelte.js';
-import { KeyboardTrigger } from './keyboard/keyboard-trigger.svelte.js';
+import type { InputTrigger } from '$lib/devices/base/input-trigger.js';
+import {
+	CompositeInputTrigger,
+	type CompositeInputTriggerContext
+} from '$lib/devices/composite/composite-input-trigger.svelte.js';
+import type { TriggerDefinition } from '$lib/devices/union.js';
+import { InterruptableKeyboardState } from '../devices/keyboard/interruptable-keyboard-state.svelte.js';
+import { registerKeyboardStateDriver } from '../devices/keyboard/keyboard-driver.svelte.js';
+import { KeyboardTrigger } from '../devices/keyboard/keyboard-trigger.svelte.js';
+import { ActionHandle, type InputHandles } from './input-handles.svelte.js';
+import type { InputSet } from './input-set.svelte.js';
+import type { ActionOf, Inputs } from './types.js';
 
 let inputManagerInstance: InputManager | undefined;
 
