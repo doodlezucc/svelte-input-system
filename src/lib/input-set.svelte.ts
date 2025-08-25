@@ -1,7 +1,5 @@
-import { untrack } from 'svelte';
-import { CompositeInputTrigger, type CompositeInputTriggerContext } from './composite.svelte.js';
-import { InputManager, useInputManager } from './input-manager.js';
-import type { InputTrigger } from './interfaces.js';
+import type { InputHandles } from './input-handle.svelte.js';
+import { useInputManager } from './input-manager.svelte.js';
 import { type KeyboardTriggerDefinition } from './keyboard/keyboard-trigger.svelte.js';
 
 export type TriggerDefinition = KeyboardTriggerDefinition;
@@ -19,12 +17,12 @@ export function createInputSet<TAction extends string>(
 }
 
 export class InputSet<TAction extends string> {
-	private readonly availableActions: TAction[];
+	readonly availableActions: TAction[];
 	readonly defaultBindings: InputBindings<TAction>;
 
 	bindings = $state() as InputBindings<TAction>;
 
-	private cachedDerivedActionStates: DerivedActionStates<TAction> | undefined;
+	private cachedInputHandles: InputHandles<TAction> | undefined;
 
 	constructor(defaultBindings: InputBindings<TAction>) {
 		this.availableActions = Object.keys(defaultBindings.actions) as TAction[];
@@ -39,86 +37,11 @@ export class InputSet<TAction extends string> {
 	}
 
 	use() {
-		if (!this.cachedDerivedActionStates) {
+		if (!this.cachedInputHandles) {
 			const inputManager = useInputManager();
-			this.cachedDerivedActionStates = this.createDerivedActionStates(inputManager);
+			this.cachedInputHandles = inputManager.createInputHandles(this);
 		}
 
-		return this.cachedDerivedActionStates;
-	}
-
-	private createDerivedActionStates(inputManager: InputManager) {
-		const result: Record<string, DerivedActionState> = {};
-
-		for (const action of this.availableActions) {
-			const compositeInputTriggerContext = new InputSetCompositeInputTriggerContext(
-				inputManager,
-				this,
-				action
-			);
-
-			const compositeTrigger = new CompositeInputTrigger(compositeInputTriggerContext);
-			result[action] = new DerivedActionState(compositeTrigger);
-		}
-
-		return result as DerivedActionStates<TAction>;
+		return this.cachedInputHandles;
 	}
 }
-
-class InputSetCompositeInputTriggerContext<TAction extends string>
-	implements CompositeInputTriggerContext
-{
-	constructor(
-		private readonly inputManager: InputManager,
-		private readonly inputSet: InputSet<TAction>,
-		private readonly action: TAction
-	) {}
-
-	readonly children = $derived.by((): InputTrigger[] =>
-		this.actionBindings.map((triggerDefinition) =>
-			this.inputManager.createKeyboardTrigger(triggerDefinition)
-		)
-	);
-
-	private readonly actionBindings = $derived.by(() => this.inputSet.bindings.actions[this.action]);
-}
-
-export class DerivedActionState {
-	private readonly trigger: InputTrigger;
-
-	constructor(trigger: InputTrigger) {
-		this.trigger = trigger;
-	}
-
-	readonly isPressed = $derived.by(() => this.trigger.isPressed);
-
-	handleDown(callback: () => void) {
-		let initialized = false;
-
-		$effect.pre(() => {
-			if (this.isPressed) {
-				untrack(() => {
-					if (initialized) callback();
-				});
-			}
-			initialized = true;
-		});
-	}
-
-	handleUp(callback: () => void) {
-		let initialized = false;
-
-		$effect.pre(() => {
-			if (!this.isPressed) {
-				untrack(() => {
-					if (initialized) callback();
-				});
-			}
-			initialized = true;
-		});
-	}
-}
-
-export type DerivedActionStates<TAction extends string> = {
-	readonly [K in TAction]: DerivedActionState;
-};
