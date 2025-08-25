@@ -1,6 +1,7 @@
 import { CompositeInputTrigger, type CompositeInputTriggerContext } from './composite.svelte.js';
 import { ActionHandle, type InputHandles } from './input-handle.svelte.js';
 import { type InputSet, type TriggerDefinition } from './input-set.svelte.js';
+import type { ActionOf, Inputs } from './inputs-type.js';
 import type { InputTrigger } from './interfaces.js';
 import { InterruptableKeyboardState } from './keyboard/interruptable-keyboard-state.svelte.js';
 import { registerKeyboardStateDriver } from './keyboard/keyboard-driver.svelte.js';
@@ -21,8 +22,8 @@ export class InputManager {
 		registerKeyboardStateDriver(this.keyboardState);
 	}
 
-	createInputHandles<TAction extends string>(inputSet: InputSet<TAction>) {
-		const result: Partial<Record<TAction, ActionHandle>> = {};
+	createInputHandles<T extends Inputs>(inputSet: InputSet<T>) {
+		const result: Partial<Record<ActionOf<T>, ActionHandle>> = {};
 
 		for (const action of inputSet.availableActions) {
 			const compositeTriggerContext = new BindingCompositeInputTrigger({
@@ -47,7 +48,7 @@ export class InputManager {
 			result[action] = actionHandle;
 		}
 
-		return result as InputHandles<TAction>;
+		return result as InputHandles<T>;
 	}
 }
 

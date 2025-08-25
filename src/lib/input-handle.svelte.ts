@@ -1,8 +1,9 @@
 import { untrack } from 'svelte';
+import type { ActionOf, Inputs } from './inputs-type.js';
 import type { InputTrigger } from './interfaces.js';
 
-export type InputHandles<TAction extends string> = {
-	readonly [K in TAction]: ActionHandle;
+export type InputHandles<T extends Inputs> = {
+	readonly [K in ActionOf<T>]: ActionHandle;
 };
 
 export class ActionHandle {
