@@ -1,3 +1,3 @@
-export interface InputTrigger {
+export interface TriggerState {
 	readonly isPressed: boolean;
 }

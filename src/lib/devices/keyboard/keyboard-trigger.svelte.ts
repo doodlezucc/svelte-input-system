@@ -1,5 +1,5 @@
 import type { XOR } from 'ts-essentials';
-import type { InputTrigger } from '../base/input-trigger.js';
+import type { TriggerState } from '../base/trigger.js';
 import type { KeyboardModifiers } from './keyboard-modifiers.js';
 import { KeyboardState } from './keyboard-state.svelte.js';
 import { normalizeLogicalKey } from './normalize-logical-key.js';
@@ -32,7 +32,7 @@ export type KeyboardTriggerDefinition = XOR<
 	readonly modifiers?: Partial<KeyboardModifiers>;
 };
 
-export class KeyboardTrigger implements InputTrigger {
+export class KeyboardTriggerState implements TriggerState {
 	private readonly keyboardState: KeyboardState;
 
 	private readonly physicalKey: string | undefined;

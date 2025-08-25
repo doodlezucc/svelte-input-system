@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { KeyboardState } from '$lib/devices/keyboard/keyboard-state.svelte.js';
-	import { KeyboardTrigger } from '$lib/devices/keyboard/keyboard-trigger.svelte.js';
+	import { KeyboardTriggerState } from '$lib/devices/keyboard/keyboard-trigger.svelte.js';
 
 	const keyboardState = new KeyboardState();
 
-	const myTrigger = new KeyboardTrigger(keyboardState, {
+	const myTrigger = new KeyboardTriggerState(keyboardState, {
 		logicalKey: 'A',
 		modifiers: {
 			shift: true

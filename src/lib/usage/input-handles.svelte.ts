@@ -1,4 +1,4 @@
-import type { InputTrigger } from '$lib/devices/base/input-trigger.js';
+import type { TriggerState } from '$lib/devices/base/trigger.js';
 import { untrack } from 'svelte';
 import type { ActionOf, Inputs } from './types.js';
 
@@ -7,9 +7,9 @@ export type InputHandles<T extends Inputs> = {
 };
 
 export class ActionHandle {
-	private readonly trigger: InputTrigger;
+	private readonly trigger: TriggerState;
 
-	constructor(trigger: InputTrigger) {
+	constructor(trigger: TriggerState) {
 		this.trigger = trigger;
 	}
 
