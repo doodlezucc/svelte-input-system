@@ -16,37 +16,26 @@ type BindingsFrom<T extends Inputs> = Prettify<{
 	};
 }>;
 
+type ReadonlyBindingsFrom<T extends Inputs> = Prettify<{
+	readonly actions: {
+		readonly [K in ActionOf<T>]: Readonly<TriggerDefinition>[];
+	};
+}>;
+
 type CreateInputsTypeFromBindings<T extends InputBindings> = Prettify<{
 	actions: {
 		[K in keyof T['actions']]: Action;
 	};
 }>;
 
-export function createInputSet<TBindings extends InputBindings>(defaultBindings: TBindings) {
-	return new InputSet<CreateInputsTypeFromBindings<TBindings>>(
-		defaultBindings as unknown as BindingsFrom<CreateInputsTypeFromBindings<TBindings>>
-	);
-}
-
-export class InputSet<T extends Inputs> {
-	readonly availableActions: ActionOf<T>[];
-	readonly defaultBindings: BindingsFrom<T>;
-
-	bindings = $state() as BindingsFrom<T>;
+export abstract class InputSet<T extends Inputs> {
+	abstract bindings: BindingsFrom<T>;
 
 	private cachedInputHandles: InputHandles<T> | undefined;
 
-	constructor(defaultBindings: BindingsFrom<T>) {
-		this.availableActions = Object.keys(defaultBindings.actions) as ActionOf<T>[];
-		this.defaultBindings = defaultBindings;
-
-		// Svelte automatically makes a deep copy when assigning the default bindings.
-		this.bindings = defaultBindings;
-	}
-
-	resetBindings() {
-		this.bindings = this.defaultBindings;
-	}
+	readonly availableActions: ActionOf<T>[] = $derived.by(
+		() => Object.keys(this.bindings.actions) as ActionOf<T>[]
+	);
 
 	use() {
 		if (!this.cachedInputHandles) {
@@ -56,4 +45,54 @@ export class InputSet<T extends Inputs> {
 
 		return this.cachedInputHandles;
 	}
+
+	static stateful<TBindings extends InputBindings>(defaultBindings: TBindings) {
+		return new StatefulInputSetImpl(defaultBindings) as unknown as StatefulInputSet<
+			CreateInputsTypeFromBindings<TBindings>
+		>;
+	}
+
+	static derived<TBindings extends InputBindings>(createBindings: () => TBindings) {
+		return new DerivedInputSetImpl(createBindings) as unknown as DerivedInputSet<
+			CreateInputsTypeFromBindings<TBindings>
+		>;
+	}
+}
+
+export interface StatefulInputSet<T extends Inputs> extends InputSet<T> {
+	readonly defaultBindings: BindingsFrom<T>;
+	resetBindings(): void;
+}
+
+class StatefulInputSetImpl<T extends Inputs> extends InputSet<T> implements StatefulInputSet<T> {
+	readonly defaultBindings: BindingsFrom<T>;
+
+	constructor(defaultBindings: BindingsFrom<T>) {
+		super();
+		this.defaultBindings = defaultBindings;
+
+		// Svelte automatically makes a deep copy when assigning the default bindings.
+		this.bindings = defaultBindings;
+	}
+
+	bindings = $state() as BindingsFrom<T>;
+
+	resetBindings() {
+		this.bindings = this.defaultBindings;
+	}
+}
+
+export interface DerivedInputSet<T extends Inputs> extends InputSet<T> {
+	readonly bindings: ReadonlyBindingsFrom<T>;
+}
+
+class DerivedInputSetImpl<T extends Inputs> extends InputSet<T> implements DerivedInputSet<T> {
+	private readonly createBindings: () => ReadonlyBindingsFrom<T>;
+
+	constructor(createBindings: () => ReadonlyBindingsFrom<T>) {
+		super();
+		this.createBindings = createBindings;
+	}
+
+	readonly bindings = $derived.by(() => this.createBindings());
 }
