@@ -1,58 +1,55 @@
-# Svelte library
+# Svelte Input System
 
-Everything you need to build a Svelte library, powered by [`sv`](https://npmjs.com/package/sv).
+A simple input system for interactive web apps, built on Svelte 5 runes.
 
-Read more about creating a library [in the docs](https://svelte.dev/docs/kit/packaging).
+## Usage
 
-## Creating a project
+Create an `InputSet` to define keybindings for any action you want to handle.
 
-If you're seeing this, you've probably already done this step. Congrats!
+```ts
+import { InputSet } from 'svelte-input-system';
 
-```sh
-# create a new project in the current directory
-npx sv create
+export const ExampleInputSet = InputSet.stateful({
+	actions: {
+		undo: [
+			{ logicalKey: 'Undo' }, // Some keyboards have a designated "Undo" button
+			{ logicalKey: 'Z', modifiers: { ctrl: true, shift: false } }
+		],
 
-# create a new project in my-app
-npx sv create my-app
+		redo: [
+			{ logicalKey: 'Redo' }, // Some keyboards have a designated "Redo" button
+			{ logicalKey: 'Z', modifiers: { ctrl: true, shift: true } },
+			{ logicalKey: 'Y', modifiers: { ctrl: true } }
+		],
+
+		sayHi: [
+			{ logicalKey: ' ' } // Space bar
+		]
+	}
+});
 ```
 
-## Developing
+Then, access the states of your registered actions in a Svelte component (or anywhere in your code, really).
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+```svelte
+<script lang="ts">
+	import { ExampleInputSet } from './example-input-set.js';
 
-```sh
-npm run dev
+	const inputs = ExampleInputSet.state;
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+	inputs.sayHi.handleDown(() => {
+		console.log('Hi!');
+	});
+
+	const isPressingUndoOrRedo = $derived(inputs.undo.isPressed || inputs.redo.isPressed);
+</script>
+
+<p>Is pressing "undo": {inputs.undo.isPressed}</p>
+<p>Is pressing "redo": {inputs.redo.isPressed}</p>
+
+<p>Is pressing either: {isPressingUndoOrRedo}</p>
 ```
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
+By using the `handleDown(...)` and `handleUp(...)` functions from one of your actions, your component can react to events while mounted and automatically dispose your callback once unmounted.
 
-## Building
-
-To build your library:
-
-```sh
-npm pack
-```
-
-To create a production version of your showcase app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
-
-## Publishing
-
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
-
-To publish your library to [npm](https://www.npmjs.com):
-
-```sh
-npm publish
-```
+You can use the `isPressed` property of an action like any other `$state` or `$derived(...)` variable - if it changes, Svelte will know what to do.
