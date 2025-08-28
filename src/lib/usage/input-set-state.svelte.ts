@@ -2,7 +2,7 @@ import type { TriggerState } from '$lib/devices/base/trigger.js';
 import { untrack } from 'svelte';
 import type { ActionOf, Inputs } from './types.js';
 
-export type InputHandles<T extends Inputs> = {
+export type InputSetState<T extends Inputs> = {
 	readonly [K in ActionOf<T>]: ActionHandle;
 };
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { InGameInputSet } from './my-mapping.js';
 
-	const input = InGameInputSet.use();
+	const input = InGameInputSet.state;
 
 	input.jump.handleDown(() => {
 		console.log('jump!');

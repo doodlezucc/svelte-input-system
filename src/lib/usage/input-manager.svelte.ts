@@ -7,7 +7,7 @@ import type { TriggerDefinition } from '$lib/devices/union.js';
 import { InterruptableKeyboardState } from '../devices/keyboard/interruptable-keyboard-state.svelte.js';
 import { registerKeyboardStateDriver } from '../devices/keyboard/keyboard-driver.svelte.js';
 import { KeyboardTriggerState } from '../devices/keyboard/keyboard-trigger.svelte.js';
-import { ActionHandle, type InputHandles } from './input-handles.svelte.js';
+import { ActionHandle, type InputSetState } from './input-set-state.svelte.js';
 import type { InputSet } from './input-set.svelte.js';
 import type { ActionOf, Inputs } from './types.js';
 
@@ -26,7 +26,7 @@ export class InputManager {
 		registerKeyboardStateDriver(this.keyboardState);
 	}
 
-	createInputHandles<T extends Inputs>(inputSet: InputSet<T>) {
+	createInputSetState<T extends Inputs>(inputSet: InputSet<T>) {
 		const result: Partial<Record<ActionOf<T>, ActionHandle>> = {};
 
 		for (const action of inputSet.availableActions) {
@@ -52,7 +52,7 @@ export class InputManager {
 			result[action] = actionHandle;
 		}
 
-		return result as InputHandles<T>;
+		return result as InputSetState<T>;
 	}
 }
 
