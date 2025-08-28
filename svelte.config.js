@@ -14,7 +14,7 @@ const config = {
 		adapter: adapter(),
 
 		alias: {
-			'svelte-inputs': 'src/lib/index.js'
+			'svelte-input-system': 'src/lib/index.js'
 		}
 	}
 };
