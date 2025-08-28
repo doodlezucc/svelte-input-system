@@ -1,4 +1,4 @@
-import { InputSet } from '$lib/usage/input-set.svelte.js';
+import { InputSet } from 'svelte-inputs';
 
 export const InGameInputSet = InputSet.stateful({
 	actions: {
