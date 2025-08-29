@@ -1,5 +1,6 @@
 import type { TriggerState } from '$lib/devices/base/trigger.js';
 import { watchBoolean } from '$lib/util/watch-boolean-effect.svelte.js';
+import { BROWSER } from 'esm-env';
 import type { InputManager } from '../input-manager.svelte.js';
 
 export class ActionHandle {
@@ -38,7 +39,10 @@ export class ConditionalActionHandle extends ActionHandle {
 		super(inputManager, trigger);
 	}
 
-	private readonly isEnabled = $derived.by(() => this.computeIsEnabled());
+	// The condition doesn't get computed during server-side rendering, because it's only
+	// relevant to live user interaction and likely contains checks against the document's
+	// "activeElement" (for example, to bypass input events while editing a text field).
+	private readonly isEnabled = $derived.by(() => BROWSER && this.computeIsEnabled());
 
 	override readonly isPressed = $derived.by(() => this.isEnabled && this.trigger.isPressed);
 
