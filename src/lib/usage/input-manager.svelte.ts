@@ -7,8 +7,9 @@ import type { TriggerDefinition } from '$lib/devices/union.js';
 import { InterruptableKeyboardState } from '../devices/keyboard/interruptable-keyboard-state.svelte.js';
 import { registerKeyboardStateDriver } from '../devices/keyboard/keyboard-driver.svelte.js';
 import { KeyboardTriggerState } from '../devices/keyboard/keyboard-trigger.svelte.js';
-import { ActionHandle, InputSetStateImpl, type ActionStates } from './input-set-state.svelte.js';
 import type { InputSet } from './input-set.svelte.js';
+import { ActionHandle } from './state/action-handle.svelte.js';
+import { InputSetStateImpl, type ActionStates } from './state/input-set-state.svelte.js';
 import type { ActionOf, Inputs } from './types.js';
 
 let inputManagerInstance: InputManager | undefined;

@@ -1,7 +1,7 @@
 import type { TriggerDefinition } from '$lib/devices/union.js';
 import type { Prettify } from 'ts-essentials';
 import { useInputManager } from './input-manager.svelte.js';
-import type { InputSetState } from './input-set-state.svelte.js';
+import type { InputSetState } from './state/input-set-state.svelte.js';
 import type { Action, ActionOf, Inputs } from './types.js';
 
 export type InputBindings = {
