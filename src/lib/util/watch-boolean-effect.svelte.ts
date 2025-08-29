@@ -12,7 +12,7 @@ export function watchBoolean(condition: () => boolean, { onTrue }: BooleanEffect
 		const isRelevantUpdate = condition();
 
 		if (initialized && isRelevantUpdate) {
-			return untrack(() => onTrue());
+			untrack(() => onTrue());
 		}
 
 		initialized = true;

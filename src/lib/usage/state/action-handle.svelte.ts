@@ -1,10 +1,13 @@
 import type { TriggerState } from '$lib/devices/base/trigger.js';
 import { watchBoolean } from '$lib/util/watch-boolean-effect.svelte.js';
+import type { InputManager } from '../input-manager.svelte.js';
 
 export class ActionHandle {
+	protected readonly inputManager: InputManager;
 	protected readonly trigger: TriggerState;
 
-	constructor(trigger: TriggerState) {
+	constructor(inputManager: InputManager, trigger: TriggerState) {
+		this.inputManager = inputManager;
 		this.trigger = trigger;
 	}
 
@@ -12,7 +15,10 @@ export class ActionHandle {
 
 	handleDown(callback: () => void) {
 		watchBoolean(() => this.isPressed, {
-			onTrue: () => callback()
+			onTrue: () => {
+				this.inputManager.preventCurrentEventDefault();
+				callback();
+			}
 		});
 	}
 
@@ -25,10 +31,11 @@ export class ActionHandle {
 
 export class ConditionalActionHandle extends ActionHandle {
 	constructor(
+		inputManager: InputManager,
 		trigger: TriggerState,
 		private readonly computeIsEnabled: () => boolean
 	) {
-		super(trigger);
+		super(inputManager, trigger);
 	}
 
 	private readonly isEnabled = $derived.by(() => this.computeIsEnabled());
@@ -39,6 +46,7 @@ export class ConditionalActionHandle extends ActionHandle {
 		watchBoolean(() => this.trigger.isPressed, {
 			onTrue: () => {
 				if (this.isEnabled) {
+					this.inputManager.preventCurrentEventDefault();
 					callback();
 				}
 			}

@@ -27,6 +27,10 @@ export class InputManager {
 		registerKeyboardStateDriver(this.keyboardState);
 	}
 
+	preventCurrentEventDefault() {
+		this.keyboardState.preventCurrentEventDefault();
+	}
+
 	createInputSetState<T extends Inputs>(inputSet: InputSet<T>) {
 		const actionHandles: Partial<Record<ActionOf<T>, ActionHandle>> = {};
 
@@ -42,18 +46,12 @@ export class InputManager {
 			});
 
 			const compositeTrigger = new CompositeTriggerState(compositeTriggerContext);
-			const actionHandle = new ActionHandle(compositeTrigger);
-
-			$effect(() => {
-				compositeTriggerContext.children.map((trigger) => trigger.isPressed);
-
-				this.keyboardState.preventCurrentEventDefault();
-			});
+			const actionHandle = new ActionHandle(this, compositeTrigger);
 
 			actionHandles[action] = actionHandle;
 		}
 
-		return new InputSetStateImpl(actionHandles as ActionStates<T>);
+		return new InputSetStateImpl(this, actionHandles as ActionStates<T>);
 	}
 }
 

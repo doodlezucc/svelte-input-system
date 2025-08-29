@@ -1,3 +1,4 @@
+import type { InputManager } from '../input-manager.svelte.js';
 import type { ActionOf, Inputs } from '../types.js';
 import { ConditionalActionHandle, type ActionHandle } from './action-handle.svelte.js';
 
@@ -23,28 +24,28 @@ export type InputSetStateFilterPredicate<T extends Inputs> = (
 ) => boolean;
 
 export class InputSetStateImpl<T extends Inputs> implements InputSetState<T> {
-	constructor(readonly actions: ActionStates<T>) {}
+	constructor(
+		private readonly inputManager: InputManager,
+		readonly actions: ActionStates<T>
+	) {}
 
 	conditional(predicate: InputSetStateFilterPredicate<T>): InputSetState<T> {
 		const matches = {} as ActionsLookup<T>;
 
 		for (const action in this.actions) {
-			// The "Action" type is merely for better looking types in the IDE.
-			// In reality, symbols get compared when evaluating the predicate.
 			matches[action] = action;
 		}
 
 		const filteredActions = { ...this.actions };
 
 		for (const action in filteredActions) {
-			filteredActions[action] = new ConditionalActionHandle(filteredActions[action], () => {
-				return predicate({
-					input: matches[action],
-					actions: matches
-				});
-			});
+			filteredActions[action] = new ConditionalActionHandle(
+				this.inputManager,
+				filteredActions[action],
+				() => predicate({ input: matches[action], actions: matches })
+			);
 		}
 
-		return new InputSetStateImpl(filteredActions);
+		return new InputSetStateImpl(this.inputManager, filteredActions);
 	}
 }
