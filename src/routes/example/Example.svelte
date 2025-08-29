@@ -3,11 +3,11 @@
 
 	const actions = ExampleInputSet.state.actions;
 
+	const isPressingUndoOrRedo = $derived(actions.undo.isPressed || actions.redo.isPressed);
+
 	actions.sayHi.handleDown(() => {
 		console.log('Hi!');
 	});
-
-	const isPressingUndoOrRedo = $derived(actions.undo.isPressed || actions.redo.isPressed);
 </script>
 
 <p>Is pressing "undo": {actions.undo.isPressed}</p>
