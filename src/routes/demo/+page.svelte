@@ -1,7 +1,18 @@
 <script lang="ts">
 	import { InGameInputSet } from './my-mapping.js';
 
-	const input = InGameInputSet.state;
+	let enableInput = $state(true);
+
+	const inputSetState = InGameInputSet.state.conditional(({ input, actions }) => {
+		switch (input) {
+			case actions.pause:
+				return true;
+		}
+
+		return enableInput;
+	});
+
+	const input = inputSetState.actions;
 
 	input.jump.handleDown(() => {
 		console.log('jump!');
@@ -29,3 +40,5 @@
 />
 
 <button onclick={() => InGameInputSet.resetBindings()}>Reset bindings</button>
+
+<input type="checkbox" bind:checked={enableInput} />
