@@ -3,6 +3,9 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
 	plugins: [sveltekit()],
+	optimizeDeps: {
+		include: ['esm-env']
+	},
 	test: {
 		expect: { requireAssertions: true },
 		projects: [
