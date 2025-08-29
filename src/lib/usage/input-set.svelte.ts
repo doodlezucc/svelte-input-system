@@ -1,7 +1,6 @@
 import type { TriggerDefinition } from '$lib/devices/union.js';
 import type { Prettify } from 'ts-essentials';
 import { useInputManager } from './input-manager.svelte.js';
-import type { InputSetState } from './state/input-set-state.svelte.js';
 import type { Action, ActionOf, Inputs } from './types.js';
 
 export type InputBindings = {
@@ -31,19 +30,13 @@ type CreateInputsTypeFromBindings<T extends InputBindings> = Prettify<{
 export abstract class InputSet<T extends Inputs> {
 	abstract bindings: BindingsFrom<T>;
 
-	private cachedInputSetState: InputSetState<T> | undefined;
-
 	readonly availableActions: ActionOf<T>[] = $derived.by(
 		() => Object.keys(this.bindings.actions) as ActionOf<T>[]
 	);
 
 	get state() {
-		if (!this.cachedInputSetState) {
-			const inputManager = useInputManager();
-			this.cachedInputSetState = inputManager.createInputSetState(this);
-		}
-
-		return this.cachedInputSetState;
+		const inputManager = useInputManager();
+		return inputManager.createInputSetState(this);
 	}
 
 	static stateful<TBindings extends InputBindings>(defaultBindings: TBindings) {
