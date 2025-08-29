@@ -35,17 +35,17 @@ Then, access the states of your registered actions in a Svelte component (or any
 <script lang="ts">
 	import { ExampleInputSet } from './example-input-set.js';
 
-	const inputs = ExampleInputSet.state;
+	const actions = ExampleInputSet.state.actions;
 
-	inputs.sayHi.handleDown(() => {
+	actions.sayHi.handleDown(() => {
 		console.log('Hi!');
 	});
 
-	const isPressingUndoOrRedo = $derived(inputs.undo.isPressed || inputs.redo.isPressed);
+	const isPressingUndoOrRedo = $derived(actions.undo.isPressed || actions.redo.isPressed);
 </script>
 
-<p>Is pressing "undo": {inputs.undo.isPressed}</p>
-<p>Is pressing "redo": {inputs.redo.isPressed}</p>
+<p>Is pressing "undo": {actions.undo.isPressed}</p>
+<p>Is pressing "redo": {actions.redo.isPressed}</p>
 
 <p>Is pressing either: {isPressingUndoOrRedo}</p>
 ```
