@@ -1,3 +1,7 @@
+### Preview 0.2.0 (2026-06-05)
+
+- Added `<ActionState>.handleDownWithRepeats(...)` function, which allows reacting to repeated down events (triggered in rapid succession while _holding_ down a trigger).
+
 ### Preview 0.1.1 (2025-08-30)
 
 - Added `ts-essentials` as a dependency, so that types can be properly resolved.
