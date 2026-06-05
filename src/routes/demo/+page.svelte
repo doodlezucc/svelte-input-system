@@ -26,6 +26,7 @@
 
 	input.pause.handleDown(() => (isPaused = !isPaused));
 
+	// eslint-disable-next-line svelte/no-inspect
 	$inspect(InGameInputSet.bindings);
 </script>
 
