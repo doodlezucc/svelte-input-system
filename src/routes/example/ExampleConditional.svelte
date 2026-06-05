@@ -12,8 +12,8 @@
 		return true;
 	});
 
-	inputs.actions.sayHi.handleDown(() => {
-		console.log('Hi!');
+	inputs.actions.sayHi.handleDownWithRepeats((context) => {
+		console.log('Hi!', context);
 	});
 </script>
 

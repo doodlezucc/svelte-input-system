@@ -1,7 +1,7 @@
 import type { XOR } from 'ts-essentials';
 import type { TriggerState } from '../base/trigger.js';
 import type { KeyboardModifiers } from './keyboard-modifiers.js';
-import { KeyboardState } from './keyboard-state.svelte.js';
+import { KeyboardState, type KeyState } from './keyboard-state.svelte.js';
 import { normalizeLogicalKey } from './normalize-logical-key.js';
 
 interface LogicalKeyboardTriggerOptions {
@@ -49,7 +49,7 @@ export class KeyboardTriggerState implements TriggerState {
 		this.modifiers = options.modifiers;
 	}
 
-	readonly isPressed = $derived.by((): boolean => {
+	private readonly areModifiersMatching = $derived.by((): boolean => {
 		if (this.modifiers) {
 			const pressed = this.keyboardState.modifiers;
 			const { alt, ctrl, meta, shift } = this.modifiers;
@@ -58,6 +58,14 @@ export class KeyboardTriggerState implements TriggerState {
 			if (ctrl !== undefined && ctrl !== pressed.ctrl) return false;
 			if (meta !== undefined && meta !== pressed.meta) return false;
 			if (shift !== undefined && shift !== pressed.shift) return false;
+		}
+
+		return true;
+	});
+
+	readonly isPressed = $derived.by((): boolean => {
+		if (!this.areModifiersMatching) {
+			return false;
 		}
 
 		if (this.physicalKey !== undefined) {
@@ -69,5 +77,25 @@ export class KeyboardTriggerState implements TriggerState {
 				normalizeLogicalKey(this.logicalKey!)
 			);
 		}
+	});
+
+	private readonly pressedKeyState = $derived.by((): KeyState | undefined => {
+		if (!this.areModifiersMatching) {
+			return undefined;
+		}
+
+		if (this.physicalKey !== undefined) {
+			return this.keyboardState.pressedPhysicalKeys.get(this.physicalKey);
+		} else if (this.matchCase) {
+			return this.keyboardState.pressedLogicalKeys.get(this.logicalKey!);
+		} else {
+			return this.keyboardState.pressedLogicalKeysNormalized.get(
+				normalizeLogicalKey(this.logicalKey!)
+			);
+		}
+	});
+
+	readonly repeats = $derived.by((): number => {
+		return this.pressedKeyState?.repeats ?? -1;
 	});
 }

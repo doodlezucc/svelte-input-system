@@ -14,4 +14,15 @@ export class CompositeTriggerState implements TriggerState {
 	readonly isPressed = $derived.by(() =>
 		this.context.children.some((trigger) => trigger.isPressed)
 	);
+
+	readonly repeats = $derived.by(() => {
+		if (!this.isPressed) {
+			return -1;
+		}
+
+		return this.context.children.reduce<number>(
+			(total, trigger) => (trigger.repeats >= 0 ? total + trigger.repeats : total),
+			0
+		);
+	});
 }
