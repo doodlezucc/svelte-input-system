@@ -1,9 +1,14 @@
 import type { TriggerState } from '$lib/devices/base/trigger.js';
 import { watchBoolean } from '$lib/util/watch-boolean-effect.svelte.js';
 import { BROWSER } from 'esm-env';
+import { untrack } from 'svelte';
 import type { InputManager } from '../input-manager.svelte.js';
 
-export class ActionHandle {
+interface RepeatsContext {
+	repeats: number;
+}
+
+export class ActionHandle implements TriggerState {
 	protected readonly inputManager: InputManager;
 	protected readonly trigger: TriggerState;
 
@@ -13,12 +18,26 @@ export class ActionHandle {
 	}
 
 	readonly isPressed = $derived.by(() => this.trigger.isPressed);
+	readonly repeats = $derived.by(() => this.trigger.repeats);
 
 	handleDown(callback: () => void) {
 		watchBoolean(() => this.isPressed, {
 			onTrue: () => {
 				this.inputManager.preventCurrentEventDefault();
 				callback();
+			}
+		});
+	}
+
+	handleDownWithRepeats(callback: (context: RepeatsContext) => void) {
+		$effect.pre(() => {
+			if (this.isPressed) {
+				const repeats = this.trigger.repeats;
+
+				untrack(() => {
+					this.inputManager.preventCurrentEventDefault();
+					callback({ repeats });
+				});
 			}
 		});
 	}
@@ -45,6 +64,7 @@ export class ConditionalActionHandle extends ActionHandle {
 	private readonly isEnabled = $derived.by(() => BROWSER && this.computeIsEnabled());
 
 	override readonly isPressed = $derived.by(() => this.isEnabled && this.trigger.isPressed);
+	override readonly repeats = $derived.by(() => (this.isEnabled ? this.trigger.repeats : -1));
 
 	override handleDown(callback: () => void) {
 		watchBoolean(() => this.trigger.isPressed, {
@@ -53,6 +73,21 @@ export class ConditionalActionHandle extends ActionHandle {
 					this.inputManager.preventCurrentEventDefault();
 					callback();
 				}
+			}
+		});
+	}
+
+	override handleDownWithRepeats(callback: (context: RepeatsContext) => void) {
+		$effect.pre(() => {
+			if (this.trigger.isPressed) {
+				const repeats = this.trigger.repeats;
+
+				untrack(() => {
+					if (this.isEnabled) {
+						this.inputManager.preventCurrentEventDefault();
+						callback({ repeats });
+					}
+				});
 			}
 		});
 	}

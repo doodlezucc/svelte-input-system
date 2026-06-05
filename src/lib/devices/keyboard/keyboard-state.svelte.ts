@@ -1,6 +1,10 @@
-import { SvelteSet } from 'svelte/reactivity';
+import { SvelteMap } from 'svelte/reactivity';
 import type { KeyboardModifiers } from './keyboard-modifiers.js';
 import { normalizeLogicalKey } from './normalize-logical-key.js';
+
+export interface KeyState {
+	repeats: number;
+}
 
 export class KeyboardState {
 	#modifiers = $state<KeyboardModifiers>({
@@ -10,9 +14,9 @@ export class KeyboardState {
 		shift: false
 	});
 
-	#pressedLogicalKeysNormalized = new SvelteSet<string>();
-	#pressedLogicalKeys = new SvelteSet<string>();
-	#pressedPhysicalKeys = new SvelteSet<string>();
+	#pressedLogicalKeysNormalized = new SvelteMap<string, KeyState>();
+	#pressedLogicalKeys = new SvelteMap<string, KeyState>();
+	#pressedPhysicalKeys = new SvelteMap<string, KeyState>();
 
 	// When pressing down the physical 'a' key while holding Shift,
 	// the reported logical key will be 'A' (assuming a QWERTY layout).
@@ -26,10 +30,12 @@ export class KeyboardState {
 	readonly modifiers = $derived(this.#modifiers);
 
 	readonly pressedLogicalKeysNormalized = $derived(
-		this.#pressedLogicalKeysNormalized as ReadonlySet<string>
+		this.#pressedLogicalKeysNormalized as ReadonlyMap<string, KeyState>
 	);
-	readonly pressedLogicalKeys = $derived(this.#pressedLogicalKeys as ReadonlySet<string>);
-	readonly pressedPhysicalKeys = $derived(this.#pressedPhysicalKeys as ReadonlySet<string>);
+	readonly pressedLogicalKeys = $derived(this.#pressedLogicalKeys as ReadonlyMap<string, KeyState>);
+	readonly pressedPhysicalKeys = $derived(
+		this.#pressedPhysicalKeys as ReadonlyMap<string, KeyState>
+	);
 
 	processFocusLoss() {
 		this.#modifiers = {
@@ -44,14 +50,12 @@ export class KeyboardState {
 	}
 
 	processKeyDown(ev: KeyboardEvent) {
-		if (ev.repeat) return;
-
 		this.applyModifiersFromEvent(ev);
 
-		this.#pressedLogicalKeys.add(ev.key);
-		this.#pressedPhysicalKeys.add(ev.code);
+		this.updateKeyStateOnDownEvent(this.#pressedLogicalKeys, ev.key);
+		this.updateKeyStateOnDownEvent(this.#pressedPhysicalKeys, ev.key);
 
-		this.#pressedLogicalKeysNormalized.add(normalizeLogicalKey(ev.key));
+		this.updateKeyStateOnDownEvent(this.#pressedLogicalKeysNormalized, normalizeLogicalKey(ev.key));
 
 		this.#pressedPhysicalToLogicalKeyMap.set(ev.code, ev.key);
 	}
@@ -78,5 +82,15 @@ export class KeyboardState {
 			meta: ev.metaKey,
 			shift: ev.shiftKey
 		};
+	}
+
+	private updateKeyStateOnDownEvent(map: SvelteMap<string, KeyState>, mapKey: string) {
+		const currentState = map.get(mapKey);
+
+		if (!currentState) {
+			map.set(mapKey, { repeats: 0 });
+		} else {
+			map.set(mapKey, { ...currentState, repeats: currentState.repeats + 1 });
+		}
 	}
 }
